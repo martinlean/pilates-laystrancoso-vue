@@ -5,17 +5,25 @@ import { imageUrl } from '../../utils/images'
 const props = defineProps({ step: { type: Object, required: true } })
 
 // O site original mantém todo o conteúdo abaixo do vídeo (CTA, depoimentos,
-// preço, mockup, professora) oculto (classe "hidden" do Tailwind) até o vídeo
-// "liberar o acesso". Medido empiricamente no DOM do original: a liberação
-// acontece entre ~25s e ~55s após a etapa carregar (não deu pra cravar o
-// segundo exato porque o player é um iframe cross-origin de terceiro:
-// scripts.converteai.net). Usamos 30s como valor central dessa janela.
+// preço, mockup, professora) oculto (classe "hidden" do Tailwind) até
+// liberar o acesso. Medido com precisão via MutationObserver instrumentado
+// direto no DOM do original (não dá pra ler o valor configurado porque a
+// árvore de componentes vem criptografada no __NEXT_DATA__ do Inlead, e a
+// liberação acontece dentro de um player de terceiro em iframe cross-origin
+// - scripts.converteai.net): em 2 medições independentes e controladas o
+// delay ficou em 205,01s e 204,99s desde a montagem da etapa (uma 3ª medição
+// isolada deu 254s, tratada como outlier). O gatilho é o tempo de parede
+// desde que a etapa carrega, não o tempo de reprodução do vídeo (uma
+// hipótese de gatilho por currentTime do vídeo foi testada e descartada:
+// em medições diferentes o vídeo estava em ~55s e ~98s de reprodução no
+// exato momento da liberação, enquanto o tempo de parede se manteve
+// consistente). Usamos 205s (205000ms) como valor final.
 const revealed = ref(false)
 let revealTimer = null
 onMounted(() => {
   revealTimer = setTimeout(() => {
     revealed.value = true
-  }, 30000)
+  }, 205000)
 })
 onUnmounted(() => {
   revealTimer && clearTimeout(revealTimer)
