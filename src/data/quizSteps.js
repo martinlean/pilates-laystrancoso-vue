@@ -289,7 +289,7 @@ export const quizSteps = [
     type: 'single-select',
     showBack: true,
     title: 'Atualmente você faz algum tipo de exercício?',
-    optionLayout: 'plain-uppercase',
+    optionLayout: 'plain',
     autoAdvance: true,
     options: [
       { label: 'SIM', value: 'sim' },
@@ -308,6 +308,7 @@ export const quizSteps = [
       badge: 'SAÚDE',
       headline: 'Pilates em casa é a modalidade mais recomendada pelos médicos após os 50 anos',
       underline: 'mais recomendada pelos médicos',
+      image: 'noticia-pilates.jpg',
     },
   },
 
@@ -385,11 +386,13 @@ export const quizSteps = [
       {
         name: 'Bianca Fortunato',
         role: 'Advogada',
+        avatar: 'avatar-bianca-fortunato.jpg',
         text: 'O desafio resolveu minhas dores e de brinde emagreci 9kg.',
       },
       {
         name: 'Camila Ferreira',
         role: 'Do lar/vendedora',
+        avatar: 'avatar-camila-ferreira.jpg',
         text:
           'Após os 50 eu achava que não seria possível recuperar meu corpo. Com 1 mês de desafio eu eliminei 6kg e estou tonificando músculos',
       },
