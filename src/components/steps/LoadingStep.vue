@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { imageUrl } from '../../utils/images'
 
 const props = defineProps({ step: { type: Object, required: true } })
 const router = useRouter()
@@ -55,13 +56,29 @@ onUnmounted(() => {
         <div class="p-3">
           <p class="font-semibold text-gray-950 text-sm leading-snug">{{ step.newsMockup.headline }}</p>
         </div>
+        <img
+          v-if="step.newsMockup.image"
+          :src="imageUrl(step.newsMockup.image)"
+          alt=""
+          class="w-full object-cover"
+        />
       </div>
 
       <div v-if="step.testimonials" class="mb-6">
         <div class="bg-white rounded-2xl p-3 border border-gray-200">
+          <div class="flex items-center gap-2 mb-1">
+            <img
+              v-if="step.testimonials[current].avatar"
+              :src="imageUrl(step.testimonials[current].avatar)"
+              alt=""
+              class="w-8 h-8 rounded-full object-cover flex-shrink-0 bg-gray-200"
+            />
+            <div>
+              <p class="text-sm font-semibold text-gray-950">{{ step.testimonials[current].name }}</p>
+              <p class="text-xs text-gray-500">{{ step.testimonials[current].role }}</p>
+            </div>
+          </div>
           <span class="text-yellow-400 block mb-1">★★★★★</span>
-          <p class="text-sm font-semibold text-gray-950">{{ step.testimonials[current].name }}</p>
-          <p class="text-xs text-gray-500 mb-2">{{ step.testimonials[current].role }}</p>
           <p class="text-sm text-gray-700">{{ step.testimonials[current].text }}</p>
         </div>
       </div>

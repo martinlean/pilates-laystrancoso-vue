@@ -1,8 +1,25 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { imageUrl } from '../../utils/images'
 
 const props = defineProps({ step: { type: Object, required: true } })
+
+// O site original mantém todo o conteúdo abaixo do vídeo (CTA, depoimentos,
+// preço, mockup, professora) oculto (classe "hidden" do Tailwind) até o vídeo
+// "liberar o acesso". Medido empiricamente no DOM do original: a liberação
+// acontece entre ~25s e ~55s após a etapa carregar (não deu pra cravar o
+// segundo exato porque o player é um iframe cross-origin de terceiro:
+// scripts.converteai.net). Usamos 30s como valor central dessa janela.
+const revealed = ref(false)
+let revealTimer = null
+onMounted(() => {
+  revealTimer = setTimeout(() => {
+    revealed.value = true
+  }, 30000)
+})
+onUnmounted(() => {
+  revealTimer && clearTimeout(revealTimer)
+})
 
 const titleParts = computed(() => {
   const idx = props.step.videoTitle.indexOf(props.step.videoTitleHighlight)
@@ -47,61 +64,63 @@ function back() {
         />
       </div>
 
-      <button type="button" class="w-full min-h-14 rounded-2xl font-semibold text-white bg-blue-500 mb-6" @click="goCheckout">
-        {{ step.ctaText }}
-      </button>
+      <div v-show="revealed">
+        <button type="button" class="w-full min-h-14 rounded-2xl font-semibold text-white bg-blue-500 mb-6" @click="goCheckout">
+          {{ step.ctaText }}
+        </button>
 
-      <h2 class="font-bold text-blue-600 text-center mb-3">{{ step.socialProofTitle }}</h2>
-      <div class="flex flex-col gap-3 mb-6">
-        <div v-for="(t, i) in step.testimonials" :key="i" class="bg-white rounded-2xl p-3 border border-gray-200">
-          <div class="flex items-center gap-2 mb-1">
-            <img :src="imageUrl(t.avatar)" alt="" class="w-8 h-8 rounded-full object-cover flex-shrink-0 bg-gray-200" />
-            <div>
-              <p class="text-sm font-semibold text-gray-950">{{ t.name }}</p>
-              <p class="text-xs text-gray-500">{{ t.date }}</p>
+        <h2 class="font-bold text-blue-600 text-center mb-3">{{ step.socialProofTitle }}</h2>
+        <div class="flex flex-col gap-3 mb-6">
+          <div v-for="(t, i) in step.testimonials" :key="i" class="bg-white rounded-2xl p-3 border border-gray-200">
+            <div class="flex items-center gap-2 mb-1">
+              <img :src="imageUrl(t.avatar)" alt="" class="w-8 h-8 rounded-full object-cover flex-shrink-0 bg-gray-200" />
+              <div>
+                <p class="text-sm font-semibold text-gray-950">{{ t.name }}</p>
+                <p class="text-xs text-gray-500">{{ t.date }}</p>
+              </div>
+              <span class="ml-auto text-yellow-400">★★★★★</span>
             </div>
-            <span class="ml-auto text-yellow-400">★★★★★</span>
+            <p class="text-sm text-gray-700">{{ t.text }}</p>
           </div>
-          <p class="text-sm text-gray-700">{{ t.text }}</p>
         </div>
-      </div>
 
-      <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center mb-6">
-        <p class="text-red-600 font-bold uppercase mb-1">{{ step.pricing.badge }}</p>
-        <p class="text-gray-500 line-through">{{ step.pricing.oldPrice }}</p>
-        <p class="text-red-500 font-bold">{{ step.pricing.discount }}</p>
-        <p class="text-3xl font-extrabold text-gray-950">{{ step.pricing.newPrice }}</p>
-        <p class="text-gray-500 text-sm mb-3">{{ step.pricing.terms }}</p>
-        <button type="button" class="w-full min-h-14 rounded-2xl font-semibold text-white bg-blue-500" @click="goCheckout">
-          {{ step.ctaText }}
-        </button>
-      </div>
+        <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center mb-6">
+          <p class="text-red-600 font-bold uppercase mb-1">{{ step.pricing.badge }}</p>
+          <p class="text-gray-500 line-through">{{ step.pricing.oldPrice }}</p>
+          <p class="text-red-500 font-bold">{{ step.pricing.discount }}</p>
+          <p class="text-3xl font-extrabold text-gray-950">{{ step.pricing.newPrice }}</p>
+          <p class="text-gray-500 text-sm mb-3">{{ step.pricing.terms }}</p>
+          <button type="button" class="w-full min-h-14 rounded-2xl font-semibold text-white bg-blue-500" @click="goCheckout">
+            {{ step.ctaText }}
+          </button>
+        </div>
 
-      <h2 class="font-bold text-gray-950 mb-3">{{ step.includesTitle }}</h2>
-      <ul class="flex flex-col gap-2 mb-4">
-        <li v-for="(item, i) in step.includesList" :key="i" class="flex items-start gap-2 text-gray-950 text-sm">
-          <span class="text-green-500">✅</span>{{ item }}
-        </li>
-      </ul>
-      <img :src="imageUrl(step.productMockup)" alt="Produto" class="w-full rounded-2xl mb-6" />
+        <h2 class="font-bold text-gray-950 mb-3">{{ step.includesTitle }}</h2>
+        <ul class="flex flex-col gap-2 mb-4">
+          <li v-for="(item, i) in step.includesList" :key="i" class="flex items-start gap-2 text-gray-950 text-sm">
+            <span class="text-green-500">✅</span>{{ item }}
+          </li>
+        </ul>
+        <img :src="imageUrl(step.productMockup)" alt="Produto" class="w-full rounded-2xl mb-6" />
 
-      <h2 class="font-bold text-gray-950 mb-3">{{ step.teacherSection.title }}</h2>
-      <img
-        :src="imageUrl(step.teacherSection.photo)"
-        alt="Lays Trancoso"
-        class="w-24 h-24 rounded-full object-cover mx-auto mb-3 bg-gray-200"
-      />
-      <p v-for="(p, i) in step.teacherSection.paragraphs" :key="i" class="text-gray-700 text-sm mb-2">{{ p }}</p>
+        <h2 class="font-bold text-gray-950 mb-3">{{ step.teacherSection.title }}</h2>
+        <img
+          :src="imageUrl(step.teacherSection.photo)"
+          alt="Lays Trancoso"
+          class="w-24 h-24 rounded-full object-cover mx-auto mb-3 bg-gray-200"
+        />
+        <p v-for="(p, i) in step.teacherSection.paragraphs" :key="i" class="text-gray-700 text-sm mb-2">{{ p }}</p>
 
-      <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center mb-8 mt-4">
-        <p class="text-red-600 font-bold uppercase mb-1">{{ step.pricing.badge }}</p>
-        <p class="text-gray-500 line-through">{{ step.pricing.oldPrice }}</p>
-        <p class="text-red-500 font-bold">{{ step.pricing.discount }}</p>
-        <p class="text-3xl font-extrabold text-gray-950">{{ step.pricing.newPrice }}</p>
-        <p class="text-gray-500 text-sm mb-3">{{ step.pricing.terms }}</p>
-        <button type="button" class="w-full min-h-14 rounded-2xl font-semibold text-white bg-blue-500" @click="goCheckout">
-          {{ step.ctaText }}
-        </button>
+        <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center mb-8 mt-4">
+          <p class="text-red-600 font-bold uppercase mb-1">{{ step.pricing.badge }}</p>
+          <p class="text-gray-500 line-through">{{ step.pricing.oldPrice }}</p>
+          <p class="text-red-500 font-bold">{{ step.pricing.discount }}</p>
+          <p class="text-3xl font-extrabold text-gray-950">{{ step.pricing.newPrice }}</p>
+          <p class="text-gray-500 text-sm mb-3">{{ step.pricing.terms }}</p>
+          <button type="button" class="w-full min-h-14 rounded-2xl font-semibold text-white bg-blue-500" @click="goCheckout">
+            {{ step.ctaText }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

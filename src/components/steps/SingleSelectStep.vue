@@ -53,22 +53,18 @@ function back() {
       </button>
     </div>
 
-    <!-- emoji-left / emoji-right / plain / plain-uppercase -->
+    <!-- emoji-left / emoji-right / plain -->
     <div v-else class="flex flex-col gap-3 mb-6">
       <button
         v-for="opt in step.options"
         :key="opt.value"
         type="button"
-        class="w-full min-h-14 flex items-center px-4 py-3 rounded-2xl border border-gray-200 bg-white hover:border-blue-500 text-left"
-        :class="step.optionLayout === 'plain-uppercase' ? 'justify-center text-center font-bold uppercase' : 'justify-between'"
+        class="w-full min-h-14 flex items-center justify-between px-4 py-3 rounded-2xl border border-gray-200 bg-white hover:border-blue-500 text-left"
         @click="select(opt.value)"
       >
         <span class="flex items-center gap-3">
           <span v-if="opt.emoji && step.optionLayout === 'emoji-left'" class="text-2xl">{{ opt.emoji }}</span>
-          <span
-            v-if="step.optionLayout !== 'plain-uppercase'"
-            class="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0"
-          />
+          <span class="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
           <span v-if="opt.richHTML" class="text-gray-950" v-html="opt.richHTML" />
           <span v-else-if="opt.label" class="text-gray-950">{{ opt.label }}</span>
         </span>
